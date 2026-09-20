@@ -31,7 +31,6 @@
         h1 { text-align: center; color: var(--primary); font-weight: 700; margin-bottom: 30px; }
         h2 { font-size: 1.4rem; color: var(--text-main); border-bottom: 2px solid var(--primary); padding-bottom: 8px; margin-top: 40px; }
 
-        /* Modern Accordion Styling */
         details {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -68,7 +67,6 @@
 
         .details-content { padding: 0 20px 20px 20px; border-top: 1px solid var(--border); margin-top: 10px; padding-top: 15px; }
 
-        /* Tap-friendly Checkboxes */
         label { 
             display: flex; 
             align-items: flex-start; 
@@ -114,22 +112,21 @@
             transform: translate(-50%, -50%);
         }
 
-        /* Form Inputs */
-        textarea { 
+        input[type="text"], textarea {
             width: 100%; 
-            height: 180px; 
             padding: 15px; 
             border-radius: var(--radius); 
             border: 1px solid var(--border); 
             font-family: inherit; 
             font-size: 1rem;
-            margin-bottom: 20px; 
             box-sizing: border-box;
-            resize: vertical;
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
         }
         
-        textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,86,179,0.1); }
+        input[type="text"] { margin-bottom: 25px; }
+        textarea { height: 180px; margin-bottom: 20px; resize: vertical; }
+        
+        input[type="text"]:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,86,179,0.1); }
 
         .drug-grid {
             display: grid;
@@ -137,7 +134,6 @@
             gap: 10px;
         }
 
-        /* Sticky Action Bar */
         .action-bar {
             position: fixed;
             bottom: 0;
@@ -344,6 +340,11 @@
         </details>
 
         <h2 style="margin-top: 30px;">Evidence & Clinical Reflection</h2>
+        
+        <label for="paramedicName" style="font-weight: 600; font-size: 1.1rem; padding-left: 0; margin-bottom: 8px;">Crewmate / Paramedic Name:</label>
+        <input type="text" id="paramedicName" placeholder="Enter the name of the paramedic you were with..." required>
+
+        <label for="evidenceText" style="font-weight: 600; font-size: 1.1rem; padding-left: 0; margin-bottom: 8px;">Clinical Reflection:</label>
         <textarea id="evidenceText" placeholder="Write your clinical reflection or scenario details here..." required></textarea>
 
         <div class="action-bar">
@@ -358,7 +359,6 @@
         const form = document.getElementById('trackerForm');
         const statusDiv = document.getElementById('status');
 
-        // Optional: Auto-close other details when one is opened for cleaner mobile viewing
         const details = document.querySelectorAll("details");
         details.forEach((targetDetail) => {
             targetDetail.addEventListener("click", () => {
@@ -375,7 +375,6 @@
             statusDiv.textContent = 'Submitting...';
             statusDiv.style.color = 'var(--text-main)';
 
-            // Gather Competencies
             const checkboxes = document.querySelectorAll('input[name="competency"]:checked');
             let selectedCompetencies = [];
             checkboxes.forEach((cb) => {
@@ -384,13 +383,13 @@
 
             if(selectedCompetencies.length === 0) {
                 statusDiv.textContent = 'Please select at least one competency.';
-                statusDiv.style.color = '#dc3545'; // Red error color
+                statusDiv.style.color = '#dc3545';
                 return;
             }
 
             const evidence = document.getElementById('evidenceText').value;
+            const paramedicName = document.getElementById('paramedicName').value;
 
-            // Determine if CAP or ROP or both are checked for the 'types' column
             let types = [];
             const hasCAP = selectedCompetencies.some(comp => comp.startsWith('CAP'));
             const hasROP = selectedCompetencies.some(comp => comp.startsWith('ROP'));
@@ -401,7 +400,8 @@
             const payload = {
                 types: types.join(', '),
                 competencies: selectedCompetencies,
-                evidence: evidence
+                evidence: evidence,
+                paramedicName: paramedicName
             };
 
             fetch(scriptURL, {
@@ -416,10 +416,8 @@
                 statusDiv.textContent = 'Success! Saved to Sheets.';
                 statusDiv.style.color = 'var(--success)';
                 form.reset();
-                // Close all accordions on successful submit
                 details.forEach(d => d.removeAttribute("open"));
                 
-                // Clear status after 3 seconds
                 setTimeout(() => {
                     statusDiv.textContent = '';
                 }, 3000);
