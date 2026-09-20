@@ -15,6 +15,7 @@
         button { background-color: #28a745; color: white; padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; width: 100%; }
         button:hover { background-color: #218838; }
         #status { margin-top: 15px; font-weight: bold; text-align: center; }
+        .type-checkbox { display: inline-block; margin-right: 20px; text-indent: 0; padding-left: 0; font-size: 16px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -22,6 +23,12 @@
     <h1>Level 6 Padlet Sign-off Tracker</h1>
     <form id="trackerForm">
         
+        <div class="competency-group">
+            <h3>Entry Type</h3>
+            <label class="type-checkbox"><input type="checkbox" name="entryType" value="CAP"> CAP</label>
+            <label class="type-checkbox"><input type="checkbox" name="entryType" value="ROP"> ROP</label>
+        </div>
+
         <div class="competency-group">
             <h3>Professional Values[cite: 1]</h3>
             <label><input type="checkbox" name="competency" value="1.1"> 1.1 - Respect and uphold the rights, dignity, values, and autonomy of every service user across all areas of practice, including their role in the diagnostic and therapeutic process.[cite: 1]</label>
@@ -106,14 +113,23 @@
             statusDiv.textContent = 'Submitting to Sheets...';
             statusDiv.style.color = '#0056b3';
 
+            // Gather Entry Types (CAP/ROP)
+            const typeCheckboxes = document.querySelectorAll('input[name="entryType"]:checked');
+            let selectedTypes = [];
+            typeCheckboxes.forEach((cb) => {
+                selectedTypes.push(cb.value);
+            });
+            const entryTypeString = selectedTypes.join(", ");
+
+            // Gather Competencies
             const checkboxes = document.querySelectorAll('input[name="competency"]:checked');
             let selectedCompetencies = [];
             checkboxes.forEach((cb) => {
                 selectedCompetencies.push(cb.value);
             });
 
-            if(selectedCompetencies.length === 0) {
-                statusDiv.textContent = 'Please select at least one competency.';
+            if(selectedCompetencies.length === 0 && selectedTypes.length === 0) {
+                statusDiv.textContent = 'Please select at least one competency or entry type.';
                 statusDiv.style.color = 'red';
                 return;
             }
@@ -121,6 +137,7 @@
             const evidence = document.getElementById('evidenceText').value;
 
             const payload = {
+                types: entryTypeString,
                 competencies: selectedCompetencies,
                 evidence: evidence
             };
